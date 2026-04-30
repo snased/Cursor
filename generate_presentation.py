@@ -8,7 +8,7 @@ from pptx.enum.text import PP_ALIGN
 from pptx.util import Inches, Pt
 
 
-OUT = Path("supervision_orthodox_psychologists.pptx")
+OUT = Path("супервизия/supervision_orthodox_psychologists.pptx")
 
 WHITE = RGBColor(255, 255, 255)
 INK = RGBColor(35, 47, 62)
