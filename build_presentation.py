@@ -559,7 +559,7 @@ def build():
     # I hardcoded total=16 but title is 1 and we added 15 more = 16. Good if count matches.
     assert len(prs.slides) == total, len(prs.slides)
 
-    out = "/workspace/prezentaciya-smyslovoe-prizvanie-semi.pptx"
+    out = "/workspace/supervision/prezentaciya-smyslovoe-prizvanie-semi.pptx"
     prs.save(out)
     print(out, "slides", len(prs.slides))
 
