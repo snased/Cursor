@@ -1,4 +1,4 @@
-"""Собрать положение и расчётный файл."""
+"""Собрать методику и рабочую карту оценки мастера."""
 
 from __future__ import annotations
 
@@ -8,14 +8,17 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
-from bonus_document import build_document
-from bonus_workbook import build_workbook
+from master_scorecard import build_scorecard
+from methodology_document import build_methodology
 
 
 def main() -> None:
     out = ROOT / "премирование-мастеров"
-    build_document(out / "Критерии премирования мастеров.docx")
-    build_workbook(out / "Расчёт премии мастера.xlsx")
+    build_methodology(
+        out / "Методика премирования мастеров.md",
+        out / "Методика премирования мастеров.docx",
+    )
+    build_scorecard(out / "Карта оценки премии мастера.xlsx")
     print(out)
 
 
