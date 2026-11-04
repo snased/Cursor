@@ -82,6 +82,27 @@ def test_methodology_document_contains_all_blocks(tmp_path):
         assert phrase in text
 
 
+def test_working_protocol_preserves_questions_answers_and_decisions(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    source = root / "marishka" / "Рабочий протокол разработки системы премирования мастеров.md"
+    target = tmp_path / "protocol.docx"
+    build_methodology(source, target)
+    with zipfile.ZipFile(target) as archive:
+        root_element = ElementTree.fromstring(archive.read("word/document.xml"))
+    namespace = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
+    text = "".join(node.text or "" for node in root_element.iter(f"{namespace}t"))
+    for phrase in (
+        "Вопрос эксперта",
+        "Ответ организации",
+        "Подтверждённое понимание",
+        "Открытые вопросы",
+        "Реестр решений до запуска",
+        "Предлагаемая повестка следующей встречи руководителей",
+        "Как продолжать работу с документом",
+    ):
+        assert phrase in text
+
+
 def _calculate(path: Path):
     model = formulas.ExcelModel().loads(str(path)).finish()
     return model.calculate()

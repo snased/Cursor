@@ -14,11 +14,20 @@ from methodology_document import build_methodology
 
 def main() -> None:
     out = ROOT / "премирование-мастеров"
+    handoff = ROOT / "marishka"
     build_methodology(
         out / "Методика премирования мастеров.md",
         out / "Методика премирования мастеров.docx",
     )
     build_scorecard(out / "Карта оценки премии мастера.xlsx")
+    build_methodology(
+        handoff / "Рабочий протокол разработки системы премирования мастеров.md",
+        handoff / "Рабочий протокол разработки системы премирования мастеров.docx",
+    )
+    build_methodology(
+        handoff / "Рабочий протокол разработки системы премирования мастеров.md",
+        handoff / "master_bonus_working_protocol.docx",
+    )
     print(out)
 
 
