@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.env
+draft.mp4
+renders/
+frames/
+*.log
+node_modules/

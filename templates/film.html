@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Film</title>
+<style>
+  html, body { margin: 0; background: #000; }
+  canvas { display: block; max-width: 100vw; max-height: 100vh; margin: 0 auto; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script type="module">
+import { boot } from "/studio/engine.js";
+
+boot({
+  title: __TITLE__,
+  purpose: __PURPOSE__,
+  look: __LOOK__,
+  fps: 24,
+  width: __WIDTH__,
+  height: __HEIGHT__,
+  duration: __SECONDS__,
+  music: null,
+  sound: [
+    { t: 0, kind: "pad", note: "A2", dur: __SECONDS__, gain: 0.16 },
+    { t: 0.2, kind: "pluck", note: "E4", gain: 0.2 },
+    { t: 1.2, kind: "whoosh", gain: 0.18 },
+  ],
+  voice: [],
+  draw(ctx, t, api) {
+    const sky = ctx.createLinearGradient(0, 0, 0, api.h);
+    sky.addColorStop(0, "#1b2436");
+    sky.addColorStop(1, "#d7e4f2");
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, api.w, api.h);
+    const x = api.lerp(api.w * 0.12, api.w * 0.82, api.clamp(t / __SECONDS__, 0, 1));
+    const y = api.h * 0.58 + Math.sin(t * 2.4) * api.h * 0.03;
+    ctx.fillStyle = "#f4efe6";
+    ctx.beginPath();
+    ctx.arc(x, y, api.h * 0.06, 0, Math.PI * 2);
+    ctx.fill();
+  },
+});
+</script>
+</body>
+</html>
