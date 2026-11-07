@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Бумажный кораблик</title>
+<style>
+  html, body { margin: 0; background: #000; }
+  canvas { display: block; max-width: 100vw; max-height: 100vh; margin: 0 auto; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script type="module">
+import { boot } from "/studio/engine.js";
+
+const WIDE_END = 4.286;
+const LAMP_END = 7.143;
+
+boot({
+  title: "Бумажный кораблик",
+  purpose: "cinematic",
+  look: "claymation",
+  fps: 24,
+  width: 1280,
+  height: 720,
+  duration: 10,
+  music: null,
+  sound: [
+    { t: 0, kind: "pad", note: "A2", dur: 10, gain: 0.2 },
+    { t: 0, kind: "pad", note: "E3", dur: 10, gain: 0.1 },
+    { t: 0, kind: "water", dur: 10, gain: 0.11 },
+    { t: 0, kind: "pluck", note: "A3", gain: 0.22 },
+    { t: 1.429, kind: "pluck", note: "C4", gain: 0.18 },
+    { t: 2.857, kind: "pluck", note: "E4", gain: 0.2 },
+    { t: WIDE_END, kind: "whoosh", gain: 0.22 },
+    { t: WIDE_END, kind: "pluck", note: "A4", gain: 0.2 },
+    { t: LAMP_END, kind: "whoosh", gain: 0.24 },
+    { t: LAMP_END, kind: "pluck", note: "A4", gain: 0.22 },
+    { t: 7.857, kind: "pluck", note: "E4", gain: 0.18 },
+    { t: 8.571, kind: "pluck", note: "C4", gain: 0.16 },
+    { t: 9.286, kind: "pluck", note: "A3", gain: 0.14 },
+  ],
+  voice: [
+    { t: 0.85, text: "Маленький кораблик выходит в ночную гавань.", lang: "ru", engine: "espeak" },
+  ],
+  draw(ctx, t, api) {
+    if (t < WIDE_END) wide(ctx, t, api);
+    else if (t < LAMP_END) lantern(ctx, t, api);
+    else finale(ctx, t, api);
+  },
+});
+
+function wide(ctx, t, api) {
+  const u = api.clamp(t / WIDE_END, 0, 1);
+  night(ctx, api, t, 1);
+  const x = api.lerp(api.w * 0.08, api.w * 0.64, api.ease(u));
+  const y = api.h * 0.74 + Math.sin(t * 2.1) * 7;
+  const rock = Math.sin(t * 2.1) * 0.07;
+  wake(ctx, x, y + 18, 1);
+  reflection(ctx, x, y + 34, 1, rock);
+  paperBoat(ctx, x, y, 1, rock);
+  if (t > 0.75 && t < 3.55) caption(ctx, api, "Маленький кораблик выходит в ночную гавань.");
+}
+
+function lantern(ctx, t, api) {
+  const u = api.clamp((t - WIDE_END) / (LAMP_END - WIDE_END), 0, 1);
+  night(ctx, api, t, 1.15);
+  const postX = api.w * 0.73;
+  const postY = api.h * 0.42;
+  glow(ctx, postX, postY, 210, 0.62);
+  ctx.fillStyle = "#241910";
+  ctx.fillRect(postX - 5, postY, 10, api.h * 0.28);
+  ctx.fillStyle = "#ffb15a";
+  roundRect(ctx, postX - 18, postY - 34, 36, 40, 6);
+  ctx.fill();
+  ctx.fillStyle = "#ffe1ad";
+  ctx.fillRect(postX - 8, postY - 24, 16, 18);
+  const x = api.lerp(api.w * 0.16, api.w * 0.56, api.ease(u));
+  const y = api.h * 0.7 + Math.sin(t * 2.4) * 6;
+  const rock = Math.sin(t * 2.4) * 0.08;
+  wake(ctx, x, y + 28, 1.45);
+  reflection(ctx, x, y + 48, 1.45, rock);
+  paperBoat(ctx, x, y, 1.45, rock);
+}
+
+function finale(ctx, t, api) {
+  const u = api.clamp((t - LAMP_END) / (10 - LAMP_END), 0, 1);
+  night(ctx, api, t, 1.25);
+  const shift = api.lerp(-0.7, 0.85, api.ease(u));
+  const bob = Math.sin(t * 2.2) * 0.06;
+  const yaw = 0.55 + u * 0.25;
+  api.mesh(ctx, origami(shift, yaw, bob), {
+    x: api.lerp(0.15, -0.05, u),
+    y: 0.35,
+    z: api.lerp(-5.4, -3.7, api.ease(u)),
+    fov: api.h * 0.78,
+  }, { x: -0.3, y: 0.88, z: 0.28 });
+  titleCard(ctx, api, u);
+}
+
+function night(ctx, api, t, moonScale) {
+  const sky = ctx.createLinearGradient(0, 0, 0, api.h * 0.62);
+  sky.addColorStop(0, "#101626");
+  sky.addColorStop(0.7, "#243556");
+  sky.addColorStop(1, "#4d6288");
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, api.w, api.h);
+  const moonX = api.w * 0.78;
+  const moonY = api.h * 0.18;
+  ctx.fillStyle = "#f3e2b8";
+  ctx.beginPath();
+  ctx.arc(moonX, moonY, api.h * 0.065 * moonScale, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "rgba(210, 176, 120, 0.35)";
+  ctx.beginPath();
+  ctx.arc(moonX - 10, moonY - 6, api.h * 0.012 * moonScale, 0, Math.PI * 2);
+  ctx.arc(moonX + 12, moonY + 8, api.h * 0.016 * moonScale, 0, Math.PI * 2);
+  ctx.fill();
+  stars(ctx, api, t);
+  city(ctx, api, api.h * 0.6);
+  hill(ctx, api, 0.6, "#1a2233", t * 10);
+  water(ctx, api, t, api.h * 0.64);
+  moonPath(ctx, api, t, moonX, api.h * 0.64);
+}
+
+function stars(ctx, api, t) {
+  const rand = api.rng(11);
+  for (let i = 0; i < 64; i += 1) {
+    const x = rand() * api.w;
+    const y = rand() * api.h * 0.48;
+    const twinkle = 0.35 + 0.65 * Math.abs(Math.sin(t * 1.7 + i));
+    ctx.fillStyle = `rgba(255, 248, 230, ${0.25 + twinkle * 0.55})`;
+    ctx.fillRect(x, y, 2, 2);
+  }
+}
+
+function city(ctx, api, base) {
+  const rand = api.rng(4);
+  ctx.fillStyle = "#151a28";
+  for (let i = 0; i < 22; i += 1) {
+    const x = rand() * api.w;
+    const w = 16 + rand() * 28;
+    const h = 24 + rand() * 78;
+    ctx.fillRect(x, base - h, w, h);
+  }
+  const lights = api.rng(8);
+  ctx.fillStyle = "rgba(255, 196, 120, 0.8)";
+  for (let i = 0; i < 36; i += 1) {
+    ctx.fillRect(lights() * api.w, base - 16 - lights() * 70, 2, 2);
+  }
+}
+
+function hill(ctx, api, horizon, color, shift) {
+  ctx.beginPath();
+  ctx.moveTo(0, api.h);
+  const y0 = horizon * api.h;
+  for (let x = 0; x <= api.w; x += 24) {
+    const n = Math.sin((x + shift) * 0.008) * 26 + Math.sin((x + shift) * 0.021) * 10;
+    ctx.lineTo(x, y0 + n);
+  }
+  ctx.lineTo(api.w, api.h);
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.fill();
+}
+
+function water(ctx, api, t, y0) {
+  const sea = ctx.createLinearGradient(0, y0, 0, api.h);
+  sea.addColorStop(0, "#1c3c58");
+  sea.addColorStop(1, "#102433");
+  ctx.fillStyle = sea;
+  ctx.fillRect(0, y0, api.w, api.h - y0);
+  ctx.strokeStyle = "rgba(186, 214, 230, 0.28)";
+  ctx.lineWidth = 2;
+  for (let row = 0; row < 7; row += 1) {
+    ctx.beginPath();
+    const y = y0 + 18 + row * ((api.h - y0) / 8);
+    for (let x = 0; x <= api.w; x += 16) {
+      const wave = Math.sin(x * 0.02 + t * 1.6 + row) * (4 + row);
+      ctx.lineTo(x, y + wave);
+    }
+    ctx.stroke();
+  }
+}
+
+function moonPath(ctx, api, t, x, y0) {
+  ctx.save();
+  ctx.globalAlpha = 0.38;
+  ctx.fillStyle = "#f3e2b8";
+  for (let i = 0; i < 14; i += 1) {
+    const y = y0 + 12 + i * 16;
+    if (y > api.h - 8) break;
+    const wobble = Math.sin(t * 2 + i * 0.7) * 12;
+    const w = Math.max(6, 22 - i);
+    ctx.fillRect(x - w / 2 + wobble, y, w, 7);
+  }
+  ctx.restore();
+}
+
+function paperBoat(ctx, x, y, scale, rock) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rock);
+  ctx.scale(scale, scale);
+  boatShape(ctx);
+  ctx.restore();
+}
+
+function reflection(ctx, x, y, scale, rock) {
+  ctx.save();
+  ctx.globalAlpha = 0.22;
+  ctx.translate(x, y);
+  ctx.rotate(-rock);
+  ctx.scale(scale, -scale * 0.42);
+  boatShape(ctx);
+  ctx.restore();
+}
+
+function boatShape(ctx) {
+  ctx.lineJoin = "round";
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = "rgba(92, 64, 42, 0.45)";
+  ctx.beginPath();
+  ctx.moveTo(-92, 0);
+  ctx.lineTo(-54, 34);
+  ctx.quadraticCurveTo(0, 48, 54, 34);
+  ctx.lineTo(92, 0);
+  ctx.quadraticCurveTo(0, 16, -92, 0);
+  ctx.fillStyle = "#f4ecde";
+  ctx.fill();
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(-68, 2);
+  ctx.lineTo(0, -52);
+  ctx.lineTo(68, 2);
+  ctx.closePath();
+  ctx.fillStyle = "#fffaf3";
+  ctx.fill();
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(0, -52);
+  ctx.lineTo(0, 6);
+  ctx.stroke();
+}
+
+function wake(ctx, x, y, scale) {
+  ctx.strokeStyle = "rgba(214, 228, 214, 0.35)";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(x - 30 * scale, y);
+  ctx.quadraticCurveTo(x - 80 * scale, y + 16, x - 140 * scale, y + 4);
+  ctx.stroke();
+}
+
+function glow(ctx, x, y, radius, alpha) {
+  const light = ctx.createRadialGradient(x, y, 8, x, y, radius);
+  light.addColorStop(0, `rgba(255, 176, 72, ${alpha})`);
+  light.addColorStop(1, "rgba(255, 140, 40, 0)");
+  ctx.fillStyle = light;
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function origami(shift, yaw, bob) {
+  const faces = [
+    { points: [[-1.2, 0.0, 0.55], [1.25, -0.02, 0.35], [0.2, 0.0, -0.55]], color: "#f4ead8" },
+    { points: [[-1.2, 0.0, 0.55], [0.2, 0.0, -0.55], [-0.95, 0.0, -0.45]], color: "#e7d3b2" },
+    { points: [[-1.2, 0.0, 0.55], [-0.15, 0.38, 0.05], [1.25, -0.02, 0.35]], color: "#fffaf3" },
+    { points: [[1.25, -0.02, 0.35], [-0.15, 0.38, 0.05], [0.25, 0.32, -0.2]], color: "#f6ecdc" },
+    { points: [[-0.55, 0.28, 0.12], [0.5, 0.26, -0.05], [0.05, 1.25, 0.02]], color: "#fffdf8" },
+    { points: [[0.05, 1.25, 0.02], [0.5, 0.26, -0.05], [0.15, 0.34, -0.28]], color: "#f0e4ce" },
+  ];
+  return faces.map((face) => ({
+    color: face.color,
+    points: face.points.map((point) => yawPoint(point, yaw, shift, bob)),
+  }));
+}
+
+function yawPoint(point, yaw, shift, bob) {
+  const [x, y, z] = point;
+  const c = Math.cos(yaw);
+  const s = Math.sin(yaw);
+  return { x: x * c + z * s + shift, y: y + bob + 0.16, z: -x * s + z * c };
+}
+
+function caption(ctx, api, text) {
+  let size = Math.round(api.h * 0.04);
+  ctx.textAlign = "center";
+  ctx.textBaseline = "alphabetic";
+  ctx.font = api.font(size, 700);
+  while (ctx.measureText(text).width > api.w * 0.86 && size > 14) {
+    size -= 1;
+    ctx.font = api.font(size, 700);
+  }
+  const width = ctx.measureText(text).width;
+  const x = api.w / 2;
+  const y = api.h * 0.9;
+  ctx.fillStyle = "rgba(12, 14, 22, 0.5)";
+  roundRect(ctx, x - width / 2 - 16, y - size - 6, width + 32, size + 18, 12);
+  ctx.fill();
+  ctx.fillStyle = "#f7f1e4";
+  ctx.fillText(text, x, y);
+}
+
+function titleCard(ctx, api, u) {
+  ctx.save();
+  ctx.globalAlpha = api.clamp(u * 2, 0, 1);
+  ctx.fillStyle = "#f3e2b8";
+  ctx.font = api.font(api.h * 0.055, 700);
+  ctx.textAlign = "left";
+  ctx.fillText("бумажный кораблик", api.w * 0.08, api.h * 0.14);
+  ctx.restore();
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+</script>
+</body>
+</html>

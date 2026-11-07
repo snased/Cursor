@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Blink</title>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script type="module">
+import { boot } from "/studio/engine.js";
+
+boot({
+  title: "Blink",
+  purpose: "cinematic",
+  look: "glossy-ad",
+  fps: 12,
+  width: 320,
+  height: 180,
+  duration: 1,
+  music: null,
+  sound: [
+    { t: 0, kind: "pad", note: "A3", dur: 1, gain: 0.3 },
+    { t: 0.1, kind: "tick", gain: 0.25 },
+  ],
+  voice: [],
+  draw(ctx, t, api) {
+    ctx.fillStyle = t < 0.5 ? "#c23b3b" : "#2f6bff";
+    ctx.fillRect(0, 0, api.w, api.h);
+    const x = api.lerp(30, api.w - 30, t);
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(x, api.h / 2, 22, 0, Math.PI * 2);
+    ctx.fill();
+  },
+});
+</script>
+</body>
+</html>

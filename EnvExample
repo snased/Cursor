@@ -1,0 +1,5 @@
+# Copy these names into .env and fill them in there.
+# Narration uses eSpeak NG on this machine unless a line sets engine to "elevenlabs".
+
+ELEVENLABS_API_KEY=
+ELEVENLABS_VOICE_ID=
