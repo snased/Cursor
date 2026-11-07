@@ -16,9 +16,9 @@ The still of two swans starts to breathe: the water ripples, the birds rock, spa
 
 | t | what the viewer sees change |
 |---|---|
-| 0.0 | The photograph is already drifting closer, and the water is moving |
-| 0.4 | New sparks catch on the water |
-| throughout | Hearts drift upward while the swans rock with the ripples |
+| 0.0 | Wide view: sky, horizon, and both swans, with the water already moving |
+| 4.0 | The horizon has climbed and the birds are larger |
+| 7.2 | Close view on the necks; the sky has left the frame |
 
 ## Sound
 
